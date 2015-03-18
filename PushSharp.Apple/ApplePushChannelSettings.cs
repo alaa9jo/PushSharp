@@ -73,7 +73,9 @@ namespace PushSharp.Apple
 
 			if (!disableCertificateCheck)	
 				CheckProductionCertificateMatching(production);
-		}
+
+            this.ValidateServerCertificate = false;
+        }
 
 		public bool DetectProduction(X509Certificate2 certificate)
 		{
@@ -104,7 +106,7 @@ namespace PushSharp.Apple
 					throw new ArgumentException("You have selected the Production server, yet your Certificate does not appear to be the Production certificate!  Please check to ensure you have the correct certificate!");
 
 
-				if (!production && !subjectName.Contains("Apple Development IOS Push Services"))
+				if (!production && !subjectName.Contains("Apple Development IOS Push Services") && !subjectName.Contains("Pass Type ID"))
 						throw new ArgumentException("You have selected the Development/Sandbox (Not production) server, yet your Certificate does not appear to be the Development/Sandbox certificate!  Please check to ensure you have the correct certificate!");				
 			}
 			else
@@ -188,6 +190,12 @@ namespace PushSharp.Apple
 			get;
 			set;
 		}
+
+        public bool ValidateServerCertificate
+        {
+            get;
+            set;
+        }
 
 		public int ConnectionTimeout { get; set; }
 		public int MaxConnectionAttempts { get; set; }

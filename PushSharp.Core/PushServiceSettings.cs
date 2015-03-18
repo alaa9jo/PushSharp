@@ -10,11 +10,12 @@ namespace PushSharp.Core
 		public PushServiceSettings()
 		{
 			this.AutoScaleChannels = true;
-			this.MaxAutoScaleChannels = 100;
+			this.MaxAutoScaleChannels = 20;
 			this.MinAvgTimeToScaleChannels = 100;
 			this.Channels = 1;
 			this.MaxNotificationRequeues = 5;
 			this.NotificationSendTimeout = 15000;
+			this.IdleTimeout = TimeSpan.FromMinutes (5);
 		}
 
 		public bool AutoScaleChannels { get; set; }
@@ -23,5 +24,6 @@ namespace PushSharp.Core
 		public int Channels { get; set; }
 		public int MaxNotificationRequeues { get; set; }
 		public int NotificationSendTimeout { get; set; }
+		public TimeSpan IdleTimeout { get;set; }
 	}
 }

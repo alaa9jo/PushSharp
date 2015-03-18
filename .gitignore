@@ -13,7 +13,9 @@ obj
 *.resharper
 *.svn
 *.sln.DotSettings.user
-
+*.crx
+*.pem
+*.csproj.user
 
 
 # mstest test results
@@ -25,3 +27,6 @@ packages/
 
 Xamarin/
 PushSharp.Sample.LocalTesting/
+
+node_modules/
+.idea/

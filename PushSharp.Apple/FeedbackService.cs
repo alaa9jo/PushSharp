@@ -63,7 +63,7 @@ namespace PushSharp.Apple
 				(sender, cert, chain, sslErrs) => { return true; },
 				(sender, targetHost, localCerts, remoteCert, acceptableIssuers) => { return certificate; });
 
-			stream.AuthenticateAsClient(settings.FeedbackHost, certificates, System.Security.Authentication.SslProtocols.Ssl3, false);
+			stream.AuthenticateAsClient(settings.FeedbackHost, certificates, System.Security.Authentication.SslProtocols.Tls, false);
 
 
 			//Set up
@@ -92,8 +92,8 @@ namespace PushSharp.Apple
 
 					int tSeconds = BitConverter.ToInt32(bSeconds, 0);
 
-					//Add seconds since 1970 to that date, in UTC and then get it locally
-					var timestamp = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(tSeconds).ToLocalTime();
+					//Add seconds since 1970 to that date, in UTC
+					var timestamp = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(tSeconds);
 
 					//flag to allow feedback times in UTC or local, but default is local
 					if (!settings.FeedbackTimeIsUTC)
@@ -121,9 +121,23 @@ namespace PushSharp.Apple
 				//Read the next feedback
 				recd = stream.Read(buffer, 0, buffer.Length);
 			}
-			
 
-			
+			try
+			{
+				stream.Close ();
+				stream.Dispose();
+			}
+			catch { }
+
+			try 
+			{
+				client.Client.Shutdown (SocketShutdown.Both);
+				client.Client.Dispose ();
+			}
+			catch { }
+
+			try { client.Close (); } catch { }
+
 		}
 	}
 }

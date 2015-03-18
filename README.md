@@ -1,18 +1,22 @@
-PushSharp 2.x
-=============
+PushSharp [![Build Status](http://teamcity.codebetter.com/app/rest/builds/buildType:\(id:bt990\)/statusIcon)](http://teamcity.codebetter.com/project.html?projectId=project338&tab=projectOverview&guest=1)
+===========================
 
-A server-side library for sending Push Notifications to iOS (iPhone/iPad APNS), Android (C2DM and GCM - Google Cloud Message), Windows Phone, and Windows 8 devices!
+A server-side library for sending Push Notifications to iOS (iPhone/iPad APNS), OSX (APNS 10.8+) Android (C2DM and GCM - Google Cloud Message), Chrome (GCM) Windows Phone, Windows 8, Blackberry (PAP), and Amazon (ADM) devices!
 
 ![PushSharp Diagram](https://github.com/Redth/PushSharp/raw/master/Resources/PushSharp-Diagram.png)
 *********
 
-###Join me at Xamarin Evolve for a session on Push Notifications and PushSharp!###
-I will be presenting a session during the conference days at Xamarin Evolve in Austin, TX, April 14-17.  
-Visit [http://xamarin.com/evolve/](http://xamarin.com/evolve "Xamarin.com/Evolve") for more info!
+###PushSharp was at Evolve 2013!###
+I was fortunate enough to attend and present at Evolve 2013 in Austin, and the video is now online! [http://xamarin.com/evolve/2013#session-b8fz8gfsnf](http://xamarin.com/evolve/2013#session-b8fz8gfsnf)
 
 
 News
 ----
+**August 8, 2013** 2.1.2-beta released, release notes below...
+
+**June 3, 2013** Xamarin Evolve video on PushSharp is now online! [http://xamarin.com/evolve/2013#session-b8fz8gfsnf](http://xamarin.com/evolve/2013#session-b8fz8gfsnf)
+
+**May 31, 2013** 2.1.1-beta is released!  See the release notes below...
 
 **March 19, 2013** 2.0 is released! See the release notes below...
 
@@ -25,8 +29,11 @@ Features
  - Supports sending push notifications for many platforms:
    - Apple (APNS - iPhone, iPad, Mountain Lion)
    - Android (GCM/C2DM - Phones/Tablets)
+   - Chrome (GCM)
+   - Amazon (ADM - Amazon Device Messaging)
    - Windows Phone 7 / 7.5 / 8 (including FlipTile, CycleTile, and IconicTile Templates!)
    - Windows 8
+   - Blackberry (BIS and BES via PAP)
    - Firefox OS (Coming soon)
  - Fluent API for constructing Notifications for each platform
  - Auto Scaling of notification channels (more workers/connections are added as demand increases, and scaled down as it decreases)
@@ -82,6 +89,21 @@ Please see the PushSharp.Sample project for a more thorough example!
 
 ********************
 
+v2.1.2 BETA Release Notes
+--------------------------
+
+v2.1.x is still BETA.  For iOS, Android, Windows, and Windows phone it should be quite stable still, however this is a first release of Blackberry and Amazon support!
+
+**Changes**
+
+ - Amazon Device Messaging support
+ - Chrome GCM support
+ - Blackberry BIS (and BES in theory) support
+ - Performance enhancements
+ - APNS Stability Improvements
+ - Other bugfixes
+ 
+
 v2.0 Release Notes
 ------------------
 
@@ -119,10 +141,27 @@ FAQ's
 ------------------------
 
 ##### How do I use PushSharp in my ASP.NET Web Application?  #####
-The ideal way is to create a ***singleton PushBroker instance*** in your Global.asax file.  You should keep this singleton instance around for the lifespan of your web application.  You should not be creating and destroying instances of PushBroker each time you send a notification, as this uses unnecessary resources and if you're using Apple APNS, they require you to keep the connection to their servers open as long as possible when sending notifications.
+An ASP.NET application is NOT the ideal place to use PushSharp.  You'd be better off using a Windows Service, or some other infrastructure if at all possible.  The reason is that in an ASP.NET application, the Application Pool (AppPool) can be restarted on you and is usually not under your direct control, which means all the Queued notifications that PushSharp may be in the process of sending could be lost if PushSharp is not cleaned up gracefully.
 
-##### How do I support multiple iOS/GCM/WP/W8 Apps with PushSharp? #####
-For every unique application you are sending notifications to, you should create an instance of PushBroker.  Each PushBroker instance can only support a single application for each platform.  
+If you MUST run PushSharp in an ASP.NET application, the best way is to create a ***singleton PushBroker instance*** in your Global.asax file.  You should keep this singleton instance around for the lifespan of your web application, including a call to pushBroker.StopAllServices() when your Application is ending (Application_End in global.asax).
+
+You can help mitigate losing messages due to unforeseen App Pool terminations or restarts by persisting notifications you want to send in some other way, and only removing them from that persistent storage once the OnNotificationSent event has fired.  This is still not perfect (you may risk multiple notification deliveries), but it's probably adequate for most.
+
+You should not be creating and destroying instances of PushBroker each time you send a notification, as this uses unnecessary resources and if you're using Apple APNS, they require you to keep the connection to their servers open as long as possible when sending notifications.  You should also call pushBroker.StopAllServices() in your Application_Ended event in your Global.asax.  Keep in mind that PushSharp works.
+
+
+##### How do I support multiple applications with PushSharp? #####
+**NOTE:** as of version 2.1.2 PushSharp now supports the concept of an arbitrary ApplicationId when you Start or Register push services, for example:
+
+```csharp
+//Specify your application id when registering the service
+pushBroker.RegisterAppleService(channelSettings, "MY-APP-ID-HERE");
+
+//Specify the application id for which the notification is intended when queueing
+pushBroker.QueueNotification(notification, "MY-APP-ID"))
+```
+
+The alternative (old) way is to create an instance of PushBroker for each application you need.  
 
 
 

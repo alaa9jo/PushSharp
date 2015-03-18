@@ -90,7 +90,8 @@ namespace PushSharp.WindowsPhone
 
 		protected string XmlEncode(string text)
 		{
-			return System.Security.SecurityElement.Escape(text);
+			return text;
+			//return System.Security.SecurityElement.Escape(text);
 		}
 	}
 
@@ -136,13 +137,13 @@ namespace PushSharp.WindowsPhone
 						sb.Append("?");
 
 						foreach (string key in Parameters.Keys)
-							sb.Append(XmlEncode(key + "=" + Parameters[key].ToString()) + "&amp;");
+							sb.Append(XmlEncode(key + "=" + Parameters[key].ToString()) + "&");
 					}
 
 					var paramValue = sb.ToString();
 
-					if (!string.IsNullOrEmpty(paramValue) && paramValue.EndsWith("&amp;"))
-						paramValue.Substring(0, paramValue.Length - "&amp;".Length);
+					if (!string.IsNullOrEmpty(paramValue) && paramValue.EndsWith("&"))
+						paramValue = paramValue.Substring(0, paramValue.Length - 1);
 
 					if (!string.IsNullOrEmpty(paramValue))
 						toast.Add(new XElement(wp + "Param", paramValue));
